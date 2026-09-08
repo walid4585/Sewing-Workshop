@@ -20,7 +20,6 @@
             <polyline points="15 18 9 12 15 6"/>
           </svg>
             
-
             Back
 
           </button>
@@ -31,7 +30,7 @@
 
             <div class="profile-title">
 
-              <div class="avatar-large">
+              <div class="avatar-large" [style.background]="getAvatarColor(currentWorker.name || '')">
 
                 {{ currentWorker.name.charAt(0).toUpperCase() }}
 

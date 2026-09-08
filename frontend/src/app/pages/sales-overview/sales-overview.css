@@ -1,7 +1,7 @@
 /* ============================================
    ✅ Page Container - Premium
 ============================================ */
-:host {
+body {
   display: block;
   padding: 32px;
   min-height: 100vh;
