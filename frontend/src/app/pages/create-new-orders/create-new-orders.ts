@@ -9,10 +9,12 @@ import { ProductRecord, normalizeProduct,} from '../../models/product.model';
 import { LocalCustomersService } from '../../shared/local-customers/local-customers.service';
 import { CustomerRecord } from '../../models/customer.model';
 import { Router } from '@angular/router';
+import { ToastService } from '../../shared/toast/toast';
+import { ModalComponent } from '../../layout/modal/modal';
 @Component({
   selector: 'app-new-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule ],
+  imports: [CommonModule, FormsModule, ModalComponent],
   templateUrl: './create-new-orders.html',
   styleUrls: ['./create-new-orders.css'],
 })
@@ -73,6 +75,14 @@ showFoundCustomers = signal(false);
     this.clearValidationErrors();
   }
 
+
+closeFoundCustomers(): void {
+  this.showFoundCustomers.set(false);
+  this.foundCustomers.set([]);
+}
+
+
+
   private loadWalkInCustomer(): void {
     if (this.isLoadingWalkInCustomer()) return;
     this.isLoadingWalkInCustomer.set(true);
@@ -89,7 +99,7 @@ showFoundCustomers = signal(false);
         console.error('Failed to load walk-in customer', error);
         this.isWalkInCustomer.set(false);
         this.isLoadingWalkInCustomer.set(false);
-        this.errorMessage.set('Failed to load the walk-in customer.');
+       this.toastService.error('Failed to load walk-in customer. Please try again.');
       },
     });
   }
@@ -97,10 +107,9 @@ showFoundCustomers = signal(false);
 // ==============================
 // UI State
 // ==============================
-successMessage = signal('');
-errorMessage = signal('');
-ordersCount = signal(0);
 
+ordersCount = signal(0);
+  private readonly toastService = inject(ToastService);
   private readonly localCustomersService = inject(LocalCustomersService);
   private readonly layout = inject(DashboardLayoutService);
   private readonly localOrdersService = inject(LocalOrdersService);
@@ -446,12 +455,9 @@ createOrder(customerId: number): void {
 
       console.log('Order saved', response);
        console.log(order);
-      this.successMessage.set('Order saved successfully!');
+      this.toastService.success('Order created successfully.');
 
-      setTimeout(() => {
-        this.successMessage.set('');
-        this.cdr.markForCheck();
-      }, 3000);
+      
 
       if (this.isWalkInCustomer()) {
         this.router.navigate(['/customer', customer.id]);
@@ -463,12 +469,9 @@ createOrder(customerId: number): void {
 
       console.error('Failed to save order', error);
 
-      this.errorMessage.set('Failed to save order');
+      this.toastService.error('Failed to save order. Please check stock and try again.');
 
-      setTimeout(() => {
-        this.errorMessage.set('');
-        this.cdr.markForCheck();
-      }, 3000);
+     
     },
 
   });
@@ -578,7 +581,7 @@ private addCurrentOrderToList(): void {
     size: this.size().trim(),
     quantity,
   }]);
-  this.successMessage.set('Order added to the list. You can add another product.');
+  this.toastService.success('Order added to the list successfully.');
   this.resetOrderFields();
 }
 
@@ -597,7 +600,7 @@ sendAllOrders(): void {
   this.localOrdersService.addOrders(orders).subscribe({
    next: (response) => {
   const customerId = orders[0].customerId;
-  this.successMessage.set(`${orders.length} orders saved successfully!`);
+  this.toastService.success(`${orders.length} orders saved successfully!`);
 
   this.pendingOrders.set([]);
   this.isSubmitting.set(false);
@@ -608,7 +611,7 @@ sendAllOrders(): void {
 },
     error: (error) => {
       console.error('Failed to save orders', error);
-      this.errorMessage.set('Some orders could not be saved. Please check stock and try again.');
+      this.toastService.error('Some orders could not be saved. Please check stock and try again.');
       this.isSubmitting.set(false);
     },
   });

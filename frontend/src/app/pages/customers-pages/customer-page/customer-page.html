@@ -21,7 +21,7 @@
             {{ getInitials(customer?.name || 'Customer') }}
           </div>
           <div>
-            <h1>{{ customer!.name.toUpperCase() || 'Customer Profile' }}</h1>
+           <h1>{{ customer?.name?.toUpperCase() || 'Customer Profile' }}</h1>
             <p class="subtitle">
               <span *ngIf="customer?.phone !== '---'">📞 {{ customer?.phone }}</span>
               <span *ngIf=" customer?.address !== '---'">📍 {{ customer?.address }}</span>
@@ -414,7 +414,7 @@
       </svg>
       Add Payment
     </button>
-    <button class="btn-secondary" (click)="newOrder()">
+    <button class="btn-secondary" (click)="showOrderform()">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
         <line x1="3" y1="6" x2="21" y2="6"/>
@@ -572,247 +572,228 @@
   </ng-container>
 
 </app-modal>
+<!-- ============================================ -->
+<!-- ====== Order Modal ====== -->
+<!-- ============================================ -->
+<app-modal
+  [visible]="showOrderModal()"
+  title="New Order"
+  (closed)="closeOrderform()">
+  <div class="order-form">
+    <div class="form-group">
+      <label for="new-order-product">Product</label>
+      <select
+        id="new-order-product"
+        [value]="productId() ?? ''"
+        (change)="selectOrderProduct($any($event.target).value)">
+        <option value="">Select product</option>
+        @for (product of products(); track product.id) {
+          <option [value]="product.id">
+            {{ product.title }} - {{ product.price }} DA
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="new-order-size">Size</label>
+      <input
+        id="new-order-size"
+        type="text"
+        [value]="size()"
+        (input)="size.set($any($event.target).value)"
+        placeholder="Enter size">
+    </div>
+
+    <div class="form-group">
+      <label for="new-order-quantity">Quantity</label>
+      <input
+        id="new-order-quantity"
+        type="number"
+        min="1"
+        [value]="quantity()"
+        (input)="quantity.set(+$any($event.target).value); calculateTotal()">
+    </div>
+
+    <div class="order-total">
+      Total: <strong>{{ totalPrice() }} DA</strong>
+    </div>
+
+    <div class="modal-actions">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="closeOrderform()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="newOrder()">
+        Create Order
+      </button>
+    </div>
+  </div>
+</app-modal>
+
 <app-modal
   [visible]="showDeletePaymentModal()"
   title="Delete Payment"
   (closed)="closeDeletePaymentModal()">
-
   <p>
-
     Are you sure you want to delete this payment?
-
   </p>
-
   <p>
-
-    <strong>
-
-      {{ selectedPayment()?.amount }} DA
-
-    </strong>
-
+    <strong>{{ selectedPayment()?.amount }} DA</strong>
   </p>
-
   <div class="modal-actions">
-
     <button
+      type="button"
       class="btn-secondary"
       (click)="closeDeletePaymentModal()">
-
       Cancel
-
     </button>
-
     <button
-      class=" btn-primary"
+      type="button"
+      class="btn-primary"
       (click)="confirmDeletePayment()">
-
       Delete
-
     </button>
-
   </div>
-
 </app-modal>
+
 <app-modal
   [visible]="showDeleteOrderModal()"
   title="Delete Order"
   (closed)="closeDeleteOrderModal()">
-
   <p>
-
     Are you sure you want to delete this order?
-
   </p>
-
   <p>
-
-    <strong>
-
-      {{ selectedOrder()?.product }}
-
-    </strong>
-
+    <strong>{{ selectedOrder()?.product }}</strong>
   </p>
-
   <div class="modal-actions">
-
     <button
+      type="button"
       class="btn-secondary"
       (click)="closeDeleteOrderModal()">
-
       Cancel
-
     </button>
-
     <button
+      type="button"
       class="btn-danger"
       (click)="confirmDeleteOrder()">
-
       Delete
-
     </button>
-
   </div>
-
 </app-modal>
+
 <app-modal
   [visible]="showEditOrderModal()"
   title="Edit Order"
   (closed)="closeEditOrderModal()">
-
   <div class="edit-form" *ngIf="editingOrder() as order">
-
     <!-- ============================================ -->
-<!-- Customer Information -->
-<!-- Read Only -->
-<!-- ============================================ -->
+    <!-- Customer Information -->
+    <!-- Read Only -->
+    <!-- ============================================ -->
+    <h3 class="section-title">Customer Information</h3>
 
-<h3 class="section-title">Customer Information</h3>
+    <div class="form-group">
+      <label for="edit-customer-name">Customer Name</label>
+      <input
+        id="edit-customer-name"
+        type="text"
+        [value]="order.customerName"
+        readonly
+        class="readonly-input">
+    </div>
 
-<div class="form-group">
+    <div class="form-group">
+      <label for="edit-phone">Phone</label>
+      <input
+        id="edit-phone"
+        type="text"
+        [value]="order.phone"
+        readonly
+        class="readonly-input">
+    </div>
 
-  <label>Customer Name</label>
+    <div class="form-group">
+      <label for="edit-address">Address</label>
+      <textarea
+        id="edit-address"
+        rows="3"
+        readonly
+        class="readonly-input">{{ order.address }}</textarea>
+    </div>
 
-  <input
-    type="text"
-    [value]="order.customerName"
-    readonly
-    class="readonly-input">
-
-</div>
-
-<div class="form-group">
-
-  <label>Phone</label>
-
-  <input
-    type="text"
-    [value]="order.phone"
-    readonly
-    class="readonly-input">
-
-</div>
-
-<div class="form-group">
-
-  <label>Address</label>
-
-  <textarea
-    rows="3"
-    readonly
-    class="readonly-input">
-
-{{ order.address }}
-
-  </textarea>
-
-</div>
     <!-- ============================================ -->
     <!-- Order Information -->
     <!-- ============================================ -->
-
     <h3 class="section-title">Order Information</h3>
-
     <div class="form-group">
-
-      <label>Product</label>
-
+      <label for="edit-product">Product</label>
       <select
+        id="edit-product"
         [(ngModel)]="order.productId"
-        (ngModelChange)="onProductChanged($event)"
-        placeholder="Select Product">
-         
+        (ngModelChange)="onProductChanged($event)">
+        <option [ngValue]="null" disabled>Select Product</option>
         <option
           *ngFor="let product of products()"
           [ngValue]="product.id">
-
-        {{ product.title }}
-
+          {{ product.title }}
         </option>
-
       </select>
-
     </div>
-
     <div class="form-row">
-
       <div class="form-group">
-
-        <label>Size</label>
-
+        <label for="edit-size">Size</label>
         <input
+          id="edit-size"
           type="text"
           [(ngModel)]="order.size">
-
       </div>
-
       <div class="form-group">
-
-        <label>Price</label>
-
+        <label for="edit-price">Price</label>
         <input
+          id="edit-price"
           type="number"
           [(ngModel)]="order.price">
-
       </div>
-
     </div>
-
     <div class="form-row">
-
       <div class="form-group">
-
-        <label>Quantity</label>
-
+        <label for="edit-quantity">Quantity</label>
         <input
+          id="edit-quantity"
           type="number"
           min="1"
           [(ngModel)]="order.quantity"
           (ngModelChange)="updateTotal()">
-
       </div>
-
       <div class="form-group">
-
         <label>Total Price</label>
-
-        <div class="total-price">
-
-          {{ order.totalPrice }} DA
-
-        </div>
-
+        <div class="total-price">{{ order.totalPrice }} DA</div>
       </div>
-
     </div>
-
     <!-- ============================================ -->
     <!-- Actions -->
     <!-- ============================================ -->
-
     <div class="modal-actions">
-
       <button
+        type="button"
         class="btn-secondary"
         (click)="closeEditOrderModal()">
-
         Cancel
-
       </button>
-
       <button
+        type="button"
         class="btn-primary"
         (click)="saveOrderChanges(); $event.stopPropagation()">
-
         Save Changes
-
       </button>
-
     </div>
-
   </div>
-
 </app-modal>
 </div>
-

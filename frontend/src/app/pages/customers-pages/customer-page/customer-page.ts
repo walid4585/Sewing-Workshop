@@ -5,8 +5,8 @@ import { ReactiveFormsModule, FormBuilder,FormsModule, Validators } from '@angul
 import { TransactionsService } from '../../../shared/transactions/transactions.service';
 import { LocalOrdersService } from '../../../shared/local-orders/local-orders.service';
 import { Transaction } from '../../../models/transaction.model';
-import { Order } from '../../../models/order.model';
-import { ModalComponent } from '../../../layout/modal/modal'
+import { CreateOrderPayload, Order } from '../../../models/order.model';
+import { ModalComponent } from '../../../layout/modal/modal';
 import { ToastService } from '../../../shared/toast/toast';
 import { ProductRecord } from '../../../models/product.model';
 import { LocalProductesService } from '../../../shared/local-product/local-productes.service';
@@ -62,6 +62,18 @@ get isActive(): boolean {
   totalDue = 0;
   totalPaid = 0;
   debt = 0;
+  productId = signal<number | null>(null);
+size = signal('');
+quantity = signal(1);
+selectedProduct: ProductRecord | null = null;
+//============================================
+  //order model
+  //============================================
+  showOrderModal = signal(false);
+
+price = signal(0);
+
+  totalPrice = signal(0);
 
   showPaymentModal = false;
   paymentForm = this.fb.group({
@@ -75,6 +87,8 @@ get isActive(): boolean {
 // ============================================
 
 readonly products = signal<ProductRecord[]>([]);
+
+  
   // ============================================
   // ✅ Init
   // ============================================
@@ -84,7 +98,7 @@ readonly products = signal<ProductRecord[]>([]);
 
     this.customerId = Number(params.get('id'));
 
-    console.log('customerId =', this.customerId);
+    
 
     if (this.customerId) {
 
@@ -104,7 +118,48 @@ readonly products = signal<ProductRecord[]>([]);
 
  
 
+calculateTotal(): void {
+  const quantity = Number(this.quantity());
 
+  const safeQuantity =
+    Number.isFinite(quantity) && quantity > 0
+      ? quantity
+      : 0;
+
+  const selectedProduct = this.selectedProduct;
+
+  this.quantity.set(safeQuantity);
+
+  const productPrice = selectedProduct?.price;
+
+  if (productPrice && this.price() === 0) {
+    this.price.set(Number(productPrice));
+  }
+
+  this.totalPrice.set(
+    this.price() * safeQuantity
+  );
+}
+
+selectOrderProduct(value: string): void {
+  const productId = Number(value);
+  const product = this.products().find(
+    (item) => Number(item.id) === productId
+  );
+
+  if (!value || !Number.isFinite(productId) || !product) {
+    this.productId.set(null);
+    this.selectedProduct = null;
+    this.price.set(0);
+    this.totalPrice.set(0);
+    return;
+  }
+
+  this.productId.set(productId);
+  this.selectedProduct = product;
+  this.price.set(product.price);
+  this.calculateTotal();
+}
 
 
 // ============================================
@@ -215,6 +270,19 @@ console.log('save order changes worker');
   });
 
 }
+
+
+/**
+ * Converts any product id to a valid number.
+ */
+normalizeProductId(value: string | number): number {
+  const parsed = Number(value);
+
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+
+
   // ============================================
   // ✅ Load Customer Data
   // ============================================
@@ -616,14 +684,104 @@ savePaymentChanges(): void {
 
 }
 
+showOrderform(): void{
+  console.log('order form work')
+this.showOrderModal.set(true);
 
 
+}
+ 
+closeOrderform():void{
+  this.showOrderModal.set(false);
+}
+
+
+newOrder(): void {
+
   // ============================================
-  // ✅ New Order
+  // STEP 1: Customer
   // ============================================
-  newOrder(): void {
-    console.log('New order for customer:', this.customer!.id);
+
+  if (!this.customer) {
+    this.toast.error('Customer data is not loaded.');
+    return;
   }
+
+  // ============================================
+  // STEP 2: Product
+  // ============================================
+
+  const productId = this.productId();
+  const size = this.size().trim();
+  const quantity = this.quantity();
+
+  const selectedProduct = this.products().find(
+    product => Number(product.id) === productId
+  );
+
+  if (productId === null || !selectedProduct) {
+    this.toast.error('Please select a product.');
+    return;
+  }
+
+ 
+
+  // ============================================
+  // STEP 4: Quantity
+  // ============================================
+
+  if (quantity <= 0) {
+    this.toast.error('Quantity must be greater than zero.');
+    return;
+  }
+
+  if (quantity > selectedProduct.stock) {
+    this.toast.error('Requested quantity exceeds available stock.');
+    return;
+  }
+
+  // ============================================
+  // STEP 5: Create Order
+  // ============================================
+
+  const order: CreateOrderPayload = {
+   
+
+    customerId: this.customer.id,
+    customerName: this.customer.name,
+    phone: this.customer.phone,
+    address: this.customer.address,
+
+  
+    productId: Number(selectedProduct.id),
+
+    size,
+    price: selectedProduct.price,
+    quantity,
+
+  };
+
+  console.log('New customer order:', order);
+
+  // هنا نستعمل نفس طريقة الإضافة الموجودة
+  // في LocalOrdersService / NewOrdersComponent
+  this.ordersService.addOrder(order).subscribe({
+    next: () => {
+      this.toast.success('Order created successfully.');
+      this.closeOrderform();
+      this.loadCustomerData();
+    },
+    error: (error) => {
+      console.error('Failed to create order', error);
+      this.toast.error(
+        error.error?.message ||
+        'Failed to create order.'
+      );
+    }
+  });
+}
+
+
 
   // ============================================
 // ✅ Delete Order

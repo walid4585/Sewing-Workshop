@@ -275,7 +275,9 @@ toggleFilter(): void {
   // 1. Get current data
   // ============================================
   const customer = this.customer;
-  const cycles = this.filteredCycles.length > 0 ? this.filteredCycles : this.customerCycles;
+  const ycle = this.filteredCycles.length > 0
+  ? this.filteredCycles[0]
+  : this.customerCycles[0];
 
   // ============================================
   // 2. Validate data
@@ -285,7 +287,7 @@ toggleFilter(): void {
     return;
   }
 
-  if (!cycles || cycles.length === 0) {
+  if (!cycle ) {
     console.error('No cycles available to print');
     return;
   }
@@ -293,15 +295,19 @@ toggleFilter(): void {
   // ============================================
   // 3. Calculate totals
   // ============================================
-  const totalOrders = cycles.reduce((sum, cycle) => sum + (cycle.balance?.totalOrders || 0), 0);
-  const totalPayments = cycles.reduce((sum, cycle) => sum + (cycle.balance?.totalPayments || 0), 0);
-  const totalRemaining = cycles.reduce((sum, cycle) => sum + (cycle.balance?.remaining || 0), 0);
+ const totalOrders = cycle.balance?.totalOrders || 0;
 
-  const cycleCount = cycles.length;
-  const activeCycles = cycles.filter(c => c.status === 'open').length;
-  const closedCycles = cycles.filter(c => c.status === 'closed').length;
-  const pendingCycles = cycles.filter(c => c.status === 'pending').length;
+const totalPayments = cycle.balance?.totalPayments || 0;
 
+const totalRemaining = cycle.balance?.remaining || 0;
+
+const cycleCount = 1;
+
+const activeCycles = cycle.status === 'open' ? 1 : 0;
+
+const closedCycles = cycle.status === 'closed' ? 1 : 0;
+
+const pendingCycles = cycle.status === 'pending' ? 1 : 0;
   // ============================================
   // 4. Build statement HTML - Each cycle on separate page
   // ============================================
@@ -781,7 +787,7 @@ toggleFilter(): void {
       <!-- ==========================================
            EACH CYCLE ON ITS OWN PAGE
            ========================================== -->
-      ${cycles.map((cycle, cycleIndex) => `
+      ${[cycle].map((cycle, cycleIndex) => `
         <div class="cycle-page">
           <div class="cycle-card">
             <!-- Cycle Header -->

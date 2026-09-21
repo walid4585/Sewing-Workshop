@@ -27,44 +27,15 @@
   </div>
 
   <!-- ============================================ -->
-  <!-- ====== Alerts ====== -->
+  <!-- ====== Found Customers Modal ====== -->
   <!-- ============================================ -->
-  <div *ngIf="successMessage()" class="alert success">
-    <span class="alert-icon">✅</span>
-    {{ successMessage() }}
-  </div>
 
-  <div *ngIf="errorMessage()" class="alert error">
-    <span class="alert-icon">❌</span>
-    {{ errorMessage() }}
-  </div>
-<!-- ============================================ -->
-<!-- ====== Found Customers Modal ====== -->
-<!-- ============================================ -->
-
-<div
-  class="modal-overlay"
-  *ngIf="showFoundCustomers()"
+<app-modal
+  [visible]="showFoundCustomers()"
+  (closed)="closeFoundCustomers()"
+  title="Customers Found"
 >
-
-  <div class="modal">
-
-    <div class="modal-header">
-
-      <h2>Customers Found</h2>
-
-      <button
-        type="button"
-        class="close-btn"
-        (click)="showFoundCustomers.set(false)"
-      >
-        ✕
-      </button>
-
-    </div>
-
-   <div class="modal-body">
-
+  
   <p class="info-message">
     We found customers with the same name.
     Please select the correct customer from the list below.
@@ -112,9 +83,9 @@
 
   </div>
 
-</div>
 
-    <div class="modal-footer">
+
+    
 
       <button
         type="button"
@@ -124,11 +95,11 @@
         None of these customers
       </button>
 
-    </div>
+    
 
-  </div>
+ 
 
-</div>
+</app-modal>
   <!-- ============================================ -->
   <!-- ====== Form ====== -->
   <!-- ============================================ -->
@@ -327,28 +298,14 @@
 <!-- ====== Phone Confirmation Modal ====== -->
 <!-- ============================================ -->
 
-<div
-  class="modal-overlay"
-  *ngIf="showPhoneConfirmation()"
+
+<app-modal
+  [visible]="showPhoneConfirmation()"
+  (closed)="showPhoneConfirmation.set(false)"
+  title="Customer Found"
 >
+<div class="modal">
 
-  <div class="modal">
-
-    <div class="modal-header">
-
-      <h2>Customer Found</h2>
-
-      <button
-        type="button"
-        class="close-btn"
-        (click)="showPhoneConfirmation.set(false)"
-      >
-        ✕
-      </button>
-
-    </div>
-
-    <div class="modal-body">
 
       <div class="warning-message">
 
@@ -381,9 +338,9 @@
 
       </div>
 
-    </div>
+    
 
-    <div class="modal-footer">
+    
 
       <button
         type="button"
@@ -403,6 +360,6 @@
 
     </div>
 
-  </div>
+ 
 
-</div>
+</app-modal> 

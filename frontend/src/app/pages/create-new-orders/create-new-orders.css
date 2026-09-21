@@ -376,96 +376,6 @@
   }
 }
 
-/* ============================================ */
-/* ====== Modal Overlay ====== */
-/* ============================================ */
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--glass-bg);
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  z-index: 9999;
-  
-}
-
-/* ============================================ */
-/* ====== Modal ====== */
-/* ============================================ */
-
-.modal {
-  width: 100%;
-  max-width: 650px;
-  background: var(--glass-second-bg);
-  
-  border-radius: 16px;
-  
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  animation: modalFade .25s ease;
-}
-
-/* ============================================ */
-/* ====== Header ====== */
-/* ============================================ */
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 22px;
-  color: #1e293b;
-}
-
-/* ============================================ */
-/* ====== Close Button ====== */
-/* ============================================ */
-
-.close-btn {
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 8px;
-  background:var(--btn-primary);
-  cursor: pointer;
-  font-size: 18px;
-  transition: .2s;
-}
-
-.close-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-}
-
-/* ============================================ */
-/* ====== Body ====== */
-/* ============================================ */
-
-.modal-body {
-  padding: 24px;
-  max-height: 800px;
-  overflow-y: auto;
-}
-
-.modal-body > p {
-  margin-top: 0;
-  margin-bottom: 20px;
-  
-  color: #64748b;
-  
-}
-.modal-body::-webkit-scrollbar {
-  display: none;
-}
 
 /* ============================================ */
 /* ====== Customer Card ====== */
@@ -541,35 +451,8 @@
   line-height: 1.5;
 }
 
-/* ============================================ */
-/* ====== Footer ====== */
-/* ============================================ */
 
-.modal-footer {
-  display: block;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 20px 24px;
-  border-top: 1px solid #e5e7eb;
-}
 
-/* ============================================ */
-/* ====== Animation ====== */
-/* ============================================ */
-
-@keyframes modalFade {
-
-  from {
-    opacity: 0;
-    transform: translateY(-15px) scale(.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-}
 
 /* ============================================
    ✅ Validation Error Message
